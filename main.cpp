@@ -1,6 +1,7 @@
 #include <QtSql/QtSql>
 #include <QDebug>
 #include <iostream>
+#include <stdio>
 
 #define DATA_SIZE 512
 
@@ -11,16 +12,19 @@ void  find_host(string s);
 
 int main(int argc, char *argv[])
 {
-    QString mask;
+    QString mask, userName;
 
-    if (argc == 2)
-        mask = argv[1];
-    else
-    {
-        cerr << "Usage: trun SEARCH_STRING \n";
-        exit(1);
-    }
-//    qDebug() << mask;
+    int rez=0;
+    while ( (rez = getopt(argc,argv,"u:s:")) != -1)
+        switch (rez){
+        case 'u':
+            userName = optarg;
+            break;
+        case 's':
+            mask = optarg;
+            break;
+        };
+
     string domain, user, root, ip, port;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
