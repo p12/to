@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
         cerr << "Usage: trun SEARCH_STRING \n";
         exit(1);
     }
-    qDebug() << mask;
+//    qDebug() << mask;
     string domain, user, root, ip, port;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
