@@ -1,7 +1,7 @@
 #include <QtSql/QtSql>
 #include <QDebug>
 #include <iostream>
-#include <stdio>
+#include <cstdio>
 
 #define DATA_SIZE 512
 
@@ -18,47 +18,48 @@ int main(int argc, char *argv[])
     while ( (rez = getopt(argc,argv,"u:s:")) != -1)
         switch (rez){
         case 'u':
-            userName = optarg;
+            userName = optarg;      //username
             break;
         case 's':
-            mask = optarg;
+            mask = optarg;          //search mask
             break;
         };
 
-    string domain, user, root, ip, port;
+    string domain, user, root, ip, port, enc;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName("wst.loc");
     db.setDatabaseName("passdb");
-    db.setUserName("pak");
+    db.setUserName(userName);
     db.setPassword("SqlWord");
     bool ok = db.open();
-    //    if (ok)
-    //        qDebug() << "good open";
+
     QSqlQuery query;
-    QString sel = "SELECT domain,pak,root,ip,port FROM hosts WHERE domain LIKE '%" + mask + "%'";
-    query.exec(sel);
+    QString slct = "SELECT domain," + userName + ",root,ip,port,enc FROM hosts WHERE domain LIKE '%" + mask + "%'";
+    query.exec(slct);
     if (query.next())
     {
-        domain = query.value(0).toString().toStdString();
-        user = query.value(1).toString().toStdString();
-        root = query.value(2).toString().toStdString();
-        ip = query.value(3).toString().toStdString();
-        port = query.value(4).toString().toStdString();
+        domain = query.value(0).toString().toStdString();   //hostname
+        user = query.value(1).toString().toStdString();     //user password
+        root = query.value(2).toString().toStdString();     //root password
+        ip   = query.value(3).toString().toStdString();     //ip address
+        port = query.value(4).toString().toStdString();     //ssh port
+        enc =  query.value(5).toString().toStdString();     //server encoding
     }
 
     string p_id = create_win(domain);
-    string run_cmd = "tmux send-keys -t " + p_id + " 'ssh " + ip + "\n'";
-    system(run_cmd.c_str());
+    string pref = "tmux send-keys -t " + p_id + " ";
+    string cmd = pref + " 'luit -encoding " + enc + " ssh -" + port + " " + ip + "\n'";
+    system(cmd.c_str());
     sleep(1);
-    run_cmd = "tmux send-keys -t " + p_id + " '" + user + "\n'";
-    system(run_cmd.c_str());
+    cmd = pref + " '" + user + "\n'";
+    system(cmd.c_str());
     sleep(1);
-    run_cmd = "tmux send-keys -t " + p_id + " 'su\n'";
-    system(run_cmd.c_str());
+    cmd = pref + " 'su\n'";
+    system(cmd.c_str());
     sleep(1);
-    run_cmd = "tmux send-keys -t " + p_id + " '" + root + "\n'";
-    system(run_cmd.c_str());
+    cmd = pref + " '" + root + "\n'";
+    system(cmd.c_str());
     sleep(1);
 
     return 0;
