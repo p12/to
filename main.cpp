@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     db.setDatabaseName("passdb");
     db.setUserName(userName);
     db.setPassword("SqlWord");
+    db.setConnectOptions("CLIENT_SSL=1");
     bool ok = db.open();
 
     QSqlQuery query;
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
         root = query.value(2).toString().toStdString();     //root password
         ip   = query.value(3).toString().toStdString();     //ip address
         port = query.value(4).toString().toStdString();     //ssh port
-        enc =  query.value(5).toString().toStdString();     //server encoding
+        enc  = query.value(5).toString().toStdString();     //server encoding
     }
 
     string p_id = create_win(domain);
