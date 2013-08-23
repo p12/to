@@ -12,10 +12,10 @@ void  find_host(string s);
 
 int main(int argc, char *argv[])
 {
-    QString mask, userName;
+    QString mask, userName, host;
 
     int rez=0;
-    while ( (rez = getopt(argc,argv,"u:s:")) != -1)
+    while ( (rez = getopt(argc,argv,"u:s:h:")) != -1)
         switch (rez){
         case 'u':
             userName = optarg;      //username
@@ -23,17 +23,24 @@ int main(int argc, char *argv[])
         case 's':
             mask = optarg;          //search mask
             break;
+        case 'h':
+            host = optarg;          //database host
+            break;
         };
 
     string domain, user, root, ip, port, enc;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("wst.loc");
+    db.setHostName(host);
     db.setDatabaseName("passdb");
     db.setUserName(userName);
     db.setPassword("SqlWord");
     db.setConnectOptions("CLIENT_SSL=1");
-    bool ok = db.open();
+    if (!db.open() )
+    {
+        cerr << "Unable connect to database.\n";
+        exit(1);
+    }
 
     QSqlQuery query;
     QString slct = "SELECT domain," + userName + ",root,ip,port,enc FROM hosts WHERE domain LIKE '%" + mask + "%'";
