@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
             break;
         };
 
-    string domain, user, root, ip, port, enc;
+    string domain, user, root, ip, port, enc, pass;
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
     db.setHostName(host);
@@ -74,9 +74,28 @@ int main(int argc, char *argv[])
         sleep(1);
         cmd = pref + " '" + root + "\n'";
         system(cmd.c_str());
-        sleep(1);
+
     } else if (type == "telnet")
     {
+        QString slct = "SELECT ip,username,password FROM switches WHERE ip LIKE '%" + mask + "%'";
+        query.exec(slct);
+        if (query.next())
+        {
+            ip    = query.value(0).toString().toStdString();     //ip address
+            user  = query.value(1).toString().toStdString();     //username
+            pass  = query.value(2).toString().toStdString();     //password
+        }
+
+        string p_id = create_win(mask.toStdString() );
+        string pref = "tmux send-keys -t " + p_id + " ";
+        string cmd = pref + " 'telnet " + ip + "\n'";
+        system(cmd.c_str());
+        sleep(1);
+        cmd = pref + " '" + user + "\n'";
+        system(cmd.c_str());
+        sleep(1);
+        cmd = pref + " '" + pass + "\n'";
+        system(cmd.c_str());
 
     }
 
