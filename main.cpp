@@ -12,10 +12,10 @@ void  find_host(string s);
 
 int main(int argc, char *argv[])
 {
-    QString mask, userName, host;
+    QString mask, userName, host, type;
 
     int rez=0;
-    while ( (rez = getopt(argc,argv,"u:s:h:")) != -1)
+    while ( (rez = getopt(argc,argv,"u:s:h:t:")) != -1)
         switch (rez){
         case 'u':
             userName = optarg;      //username
@@ -25,6 +25,9 @@ int main(int argc, char *argv[])
             break;
         case 'h':
             host = optarg;          //database host
+            break;
+        case 't':
+            type = optarg;          //connection type
             break;
         };
 
@@ -43,32 +46,39 @@ int main(int argc, char *argv[])
     }
 
     QSqlQuery query;
-    QString slct = "SELECT domain," + userName + ",root,ip,port,enc FROM hosts WHERE domain LIKE '%" + mask + "%'";
-    query.exec(slct);
-    if (query.next())
-    {
-        domain = query.value(0).toString().toStdString();   //hostname
-        user = query.value(1).toString().toStdString();     //user password
-        root = query.value(2).toString().toStdString();     //root password
-        ip   = query.value(3).toString().toStdString();     //ip address
-        port = query.value(4).toString().toStdString();     //ssh port
-        enc  = query.value(5).toString().toStdString();     //server encoding
-    }
 
-    string p_id = create_win(domain);
-    string pref = "tmux send-keys -t " + p_id + " ";
-    string cmd = pref + " 'luit -encoding " + enc + " ssh -" + port + " " + ip + "\n'";
-    system(cmd.c_str());
-    sleep(1);
-    cmd = pref + " '" + user + "\n'";
-    system(cmd.c_str());
-    sleep(1);
-    cmd = pref + " 'su\n'";
-    system(cmd.c_str());
-    sleep(1);
-    cmd = pref + " '" + root + "\n'";
-    system(cmd.c_str());
-    sleep(1);
+    if (type == "ssh")
+    {
+        QString slct = "SELECT domain," + userName + ",root,ip,port,enc FROM hosts WHERE domain LIKE '%" + mask + "%'";
+        query.exec(slct);
+        if (query.next())
+        {
+            domain = query.value(0).toString().toStdString();   //hostname
+            user = query.value(1).toString().toStdString();     //user password
+            root = query.value(2).toString().toStdString();     //root password
+            ip   = query.value(3).toString().toStdString();     //ip address
+            port = query.value(4).toString().toStdString();     //ssh port
+            enc  = query.value(5).toString().toStdString();     //server encoding
+        }
+
+        string p_id = create_win(domain);
+        string pref = "tmux send-keys -t " + p_id + " ";
+        string cmd = pref + " 'luit -encoding " + enc + " ssh -" + port + " " + ip + "\n'";
+        system(cmd.c_str());
+        sleep(1);
+        cmd = pref + " '" + user + "\n'";
+        system(cmd.c_str());
+        sleep(1);
+        cmd = pref + " 'su\n'";
+        system(cmd.c_str());
+        sleep(1);
+        cmd = pref + " '" + root + "\n'";
+        system(cmd.c_str());
+        sleep(1);
+    } else if (type == "telnet")
+    {
+
+    }
 
     return 0;
 }
@@ -92,7 +102,6 @@ string create_win(string title)
 
     string pane_id(buf);
     pane_id.erase(pane_id.length() - 1);
-    //    cout << pane_id << "ggg";
 
     pclose(pf);
 
