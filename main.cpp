@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
             enc  = query.value(5).toString().toStdString();     //server encoding
         }
 
-        string p_id = create_win(domain);
+        string p_id = create_win(mask.toStdString() );
         string pref = "tmux send-keys -t " + p_id + " ";
         string cmd = pref + " 'luit -encoding " + enc + " ssh -p" + port + " " + ip + "\n'";
         system(cmd.c_str());
