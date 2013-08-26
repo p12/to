@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
         string p_id = create_win(domain);
         string pref = "tmux send-keys -t " + p_id + " ";
-        string cmd = pref + " 'luit -encoding " + enc + " ssh -" + port + " " + ip + "\n'";
+        string cmd = pref + " 'luit -encoding " + enc + " ssh -p" + port + " " + ip + "\n'";
         system(cmd.c_str());
         sleep(1);
         cmd = pref + " '" + user + "\n'";
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
     } else if (type == "telnet")
     {
-        QString slct = "SELECT ip,username,password FROM switches WHERE ip LIKE '%" + mask + "%'";
+        QString slct = "SELECT ip,username,password FROM switches WHERE ip LIKE '%" + mask + "'";
         query.exec(slct);
         if (query.next())
         {
