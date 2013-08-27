@@ -12,10 +12,10 @@ void  find_host(string s);
 
 int main(int argc, char *argv[])
 {
-    QString mask, userName, host, type;
+    QString mask, userName, dbPass, host, type;
 
     int rez=0;
-    while ( (rez = getopt(argc,argv,"u:s:h:t:")) != -1)
+    while ( (rez = getopt(argc,argv,"u:h:s:t:p:")) != -1)
         switch (rez){
         case 'u':
             userName = optarg;      //username
@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
         case 't':
             type = optarg;          //connection type
             break;
+        case 'p':
+            dbPass = optarg;        //database password
+            break;
         };
 
     string domain, user, root, ip, port, enc, pass;
@@ -37,7 +40,7 @@ int main(int argc, char *argv[])
     db.setHostName(host);
     db.setDatabaseName("passdb");
     db.setUserName(userName);
-    db.setPassword("SqlWord");
+    db.setPassword(dbPass);
     db.setConnectOptions("CLIENT_SSL=1");
     if (!db.open() )
     {
@@ -59,44 +62,42 @@ int main(int argc, char *argv[])
             ip   = query.value(3).toString().toStdString();     //ip address
             port = query.value(4).toString().toStdString();     //ssh port
             enc  = query.value(5).toString().toStdString();     //server encoding
+
+            string p_id = create_win(mask.toStdString() );
+            string pref = "tmux send-keys -t " + p_id + " -- ";
+            string cmd = pref + " 'luit -encoding " + enc + " ssh -p" + port + " " + ip + "\n'";
+            system(cmd.c_str());
+            sleep(1);
+            cmd = pref + " '" + user + "\n'";
+            system(cmd.c_str());
+            sleep(1);
+            cmd = pref + " 'su\n'";
+            system(cmd.c_str());
+            sleep(1);
+            cmd = pref + " '" + root + "\n'";
+            system(cmd.c_str());
         }
-
-        string p_id = create_win(mask.toStdString() );
-        string pref = "tmux send-keys -t " + p_id + " ";
-        string cmd = pref + " 'luit -encoding " + enc + " ssh -p" + port + " " + ip + "\n'";
-        system(cmd.c_str());
-        sleep(1);
-        cmd = pref + " '" + user + "\n'";
-        system(cmd.c_str());
-        sleep(1);
-        cmd = pref + " 'su\n'";
-        system(cmd.c_str());
-        sleep(1);
-        cmd = pref + " '" + root + "\n'";
-        system(cmd.c_str());
-
     } else if (type == "telnet")
     {
-        QString slct = "SELECT ip,username,password FROM switches WHERE ip LIKE '%" + mask + "'";
+        QString slct = "SELECT ip,username,password FROM switches WHERE ip LIKE '%." + mask + "'";
         query.exec(slct);
         if (query.next())
         {
             ip    = query.value(0).toString().toStdString();     //ip address
             user  = query.value(1).toString().toStdString();     //username
             pass  = query.value(2).toString().toStdString();     //password
+
+            string p_id = create_win(mask.toStdString() );
+            string pref = "tmux send-keys -t " + p_id + " -- ";
+            string cmd = pref + " 'telnet " + ip + "\n'";
+            system(cmd.c_str());
+            sleep(1);
+            cmd = pref + " '" + user + "' C-m";
+            system(cmd.c_str());
+            sleep(1);
+            cmd = pref + " '" + pass + "' C-m";
+            system(cmd.c_str());
         }
-
-        string p_id = create_win(mask.toStdString() );
-        string pref = "tmux send-keys -t " + p_id + " ";
-        string cmd = pref + " 'telnet " + ip + "\n'";
-        system(cmd.c_str());
-        sleep(1);
-        cmd = pref + " '" + user + "\n'";
-        system(cmd.c_str());
-        sleep(1);
-        cmd = pref + " '" + pass + "\n'";
-        system(cmd.c_str());
-
     }
 
     return 0;
