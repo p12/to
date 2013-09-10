@@ -52,7 +52,9 @@ int main(int argc, char *argv[])
 
     if (type == "ssh")
     {
-        QString slct = "SELECT domain," + userName + ",root,ip,port,enc FROM hosts WHERE domain LIKE '%" + mask + "%'";
+        QString slct = "SELECT domain," + userName +
+                ",root,ip,port,enc FROM hosts WHERE (domain LIKE '%"
+                + mask + "%') or (ip LIKE '%" + mask + "')";
         query.exec(slct);
         if (query.next())
         {
@@ -65,7 +67,7 @@ int main(int argc, char *argv[])
 
             string p_id = create_win(mask.toStdString() );
             string pref = "tmux send-keys -t " + p_id + " -- ";
-            string cmd = pref + " 'luit -encoding " + enc + " ssh -p" + port + " " + ip + "\n'";
+            string cmd = pref + " 'luit -encoding " + enc + " ssh -p " + port + " " + ip + "\n'";
             system(cmd.c_str());
             sleep(1);
             cmd = pref + " '" + user + "\n'";
