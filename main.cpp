@@ -8,7 +8,8 @@
 using namespace std;
 
 string create_win(string title);
-void  find_host(string s);
+string waitPass(string pid);
+
 
 int main(int argc, char *argv[])
 {
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
             string pref = "tmux send-keys -t " + p_id + " -- ";
             string cmd = pref + " 'luit -encoding " + enc + " ssh -p " + port + " " + ip + "\n'";
             system(cmd.c_str());
+            cout << waitPass(p_id) << endl;
             sleep(1);
             cmd = pref + " '" + user + "\n'";
             system(cmd.c_str());
@@ -128,4 +130,29 @@ string create_win(string title)
     pclose(pf);
 
     return pane_id;
+}
+
+string waitPass(string pid)
+{
+    FILE *pf;
+    string cmd = "tmux  capturep -p -S -20 -t " + pid + " | grep -c -i password\n";
+    char buf[DATA_SIZE];
+
+    // Setup our pipe for reading and execute our command.
+    pf = popen(cmd.c_str(),"r");
+
+    if(!pf){
+        cerr << "Could not open pipe for output.\n";
+        exit(1);
+    }
+
+    // Grab data from process execution
+    fgets(buf, DATA_SIZE , pf);
+
+    string passCnt(buf);
+    passCnt.erase(passCnt.length() - 1);
+
+    pclose(pf);
+
+    return passCnt;
 }
