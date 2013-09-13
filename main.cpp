@@ -70,9 +70,14 @@ int main(int argc, char *argv[])
             string pref = "tmux send-keys -t " + p_id + " -- ";
             string cmd = pref + " 'luit -encoding " + enc + " ssh -p " + port + " " + ip + "\n'";
             system(cmd.c_str());
+            int cnt = 0;
             while (waitPass(p_id) != "1")
             {
-                cout << waitPass(p_id) << endl;
+                if (cnt++ > 30)
+                {
+                    cerr << "Could not connecting to " << domain << endl;
+                    exit(1);
+                }
                 sleep(1);
             }
             cmd = pref + " '" + user + "\n'";
@@ -80,7 +85,9 @@ int main(int argc, char *argv[])
             sleep(1);
             cmd = pref + " 'su\n'";
             system(cmd.c_str());
-            sleep(1);
+            while (waitPass(p_id) != "2")
+                sleep(1);
+
             cmd = pref + " '" + root + "\n'";
             system(cmd.c_str());
         }
