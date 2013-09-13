@@ -70,8 +70,11 @@ int main(int argc, char *argv[])
             string pref = "tmux send-keys -t " + p_id + " -- ";
             string cmd = pref + " 'luit -encoding " + enc + " ssh -p " + port + " " + ip + "\n'";
             system(cmd.c_str());
-            cout << waitPass(p_id) << endl;
-            sleep(1);
+            while (waitPass(p_id) != "1")
+            {
+                cout << waitPass(p_id) << endl;
+                sleep(1);
+            }
             cmd = pref + " '" + user + "\n'";
             system(cmd.c_str());
             sleep(1);
