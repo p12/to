@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
             int cnt = 0;
             while (waitPass(p_id) != "1")
             {
-                if (cnt++ > 30)
+                if (cnt++ > 90)
                 {
                     cerr << "Could not connecting to " << domain << endl;
                     exit(1);
